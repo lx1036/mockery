@@ -136,6 +136,7 @@ $double->shouldReceive('findAll')
 
 You can also use this shortcut, which creates a double and sets up some stubs in
 one call:
+你也可以使用快捷方式来创建测试替身并在一次调用中安装桩件。
 
 ``` php
 $double = Mockery::mock(BookRepository::class, [
@@ -144,6 +145,7 @@ $double = Mockery::mock(BookRepository::class, [
 ```
 
 ## Method Call Expectations 📲
+## 方法调用预期 📲
 
 A Method call expectation is a mechanism to allow you to verify that a
 particular method has been called. You can specify the parameters and you can

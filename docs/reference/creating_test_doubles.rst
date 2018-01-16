@@ -20,6 +20,8 @@ unknown. Furthermore, the identifier must not be a class name. It is a
 good practice, and our recommendation, to always name the test doubles with the
 same name as the underlying class we are creating test doubles for.
 
+Mock 一个存在类时，测试替身使用"继承"来创建测试替身。
+
 If the identifier we use for our test double is a name of an existing class,
 the test double will inherit the type of the class (via inheritance), i.e. the
 mock object will pass type hints or ``instanceof`` evaluations for the existing
@@ -146,6 +148,8 @@ This spy will now be of type ``MyClass`` and implement the ``MyInterface`` and
 Mocks vs. Spies
 ---------------
 
+Mocks和Spies的区别
+
 Let's try and illustrate the difference between mocks and spies with the
 following example:
 
@@ -164,6 +168,8 @@ following example:
     var_dump($mockResult); // int(42)
     var_dump($spyResult); // null
 
+Mock可以在方法调用前设置预期数据，调用时返回预期的数据。Spy是验证方法已经被调用，方法调用结果总是null。
+
 As we can see from this example, with a mock object we set the call expectations
 before the call itself, and we get the return result we expect it to return.
 With a spy object on the other hand, we verify the call has happened after the
@@ -176,17 +182,20 @@ We also have a dedicated chapter to :doc:`spies` only.
 Partial Test Doubles
 --------------------
 
+Partial 替身用来只对一个类的某个方法设置预期数据，该类的其他方法不改变。
+
 Partial doubles are useful when we want to stub out, set expectations for, or
 spy on *some* methods of a class, but run the actual code for other methods.
 
 We differentiate between three types of partial test doubles:
 
- * runtime partial test doubles,
- * generated partial test doubles, and
- * proxied partial test doubles.
+ * runtime partial test doubles, 运行时partial测试替身
+ * generated partial test doubles, and 生成时partial测试替身
+ * proxied partial test doubles. 代理的partial测试替身
 
 Runtime partial test doubles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+运行时partial测试替身是：创建一个测试替身，然后让它自己partial，不设置预期行为，和正常对象一样
 
 What we call a runtime partial, involves creating a test double and then telling
 it to make itself partial. Any method calls that the double hasn't been told to
@@ -204,6 +213,7 @@ allow or expect, will act as they would on a normal instance of the object.
 
 We can then tell the test double to allow or expect calls as with any other
 Mockery double.
+可以后期再去设置预期行为
 
 .. code-block:: php
 
@@ -215,6 +225,8 @@ usage of runtime partial test doubles.
 
 Generated partial test doubles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+生成时partial测试替身
+生成时partial测试替身是：在创建时，会预先告诉Mockery哪些方法可以容许或期待被调用，其余方法保持不变。
 
 The second type of partial double we can create is what we call a generated
 partial. With generated partials, we specifically tell Mockery which methods
@@ -243,7 +255,7 @@ work.
 .. note::
 
     Even though we support generated partial test doubles, we do not recommend
-    using them.
+    using them. 不过不建议使用生成时partial测试替身
 
     One of the reasons why is because a generated partial will call the original
     constructor of the mocked class. This can have unwanted side-effects during
@@ -253,6 +265,9 @@ work.
 
 Proxied partial test doubles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+代理式partial测试替身
+
+对于final class就很难被mock了，同样，final method也是一样。这种不能通过继承类并覆盖方法来mock。
 
 A proxied partial mock is a partial of last resort. We may encounter a class
 which is simply not capable of being mocked because it has been marked as
@@ -263,6 +278,9 @@ need to get creative.
 .. code-block:: php
 
     $mock = \Mockery::mock(new MyClass);
+
+监听调用被路由到代理对象。这样可以mock final methods了，因为代理不会被这些条件限制。
+不过缺陷就是代理式partial测试替身不能进行类的类型检查，因为它不是继承这个类。
 
 Yes, the new mock is a Proxy. It intercepts calls and reroutes them to the
 proxied object (which we construct and pass in) for methods which are not
@@ -275,6 +293,8 @@ class being mocked since it cannot extend that class.
 
 Aliasing
 --------
+
+alias mock: 使用 alias mock可以mock类的public static methods。
 
 Prefixing the valid name of a class (which is NOT currently loaded) with
 "alias:" will generate an "alias mock". Alias mocks create a class alias with
@@ -289,11 +309,11 @@ to static methods will be used by all static calls to this class.
 
 .. note::
 
-    Even though aliasing classes is supported, we do not recommend it.
+    Even though aliasing classes is supported, we do not recommend it. 不建议使用。
 
-Overloading
+Overloading 重载
 -----------
-
+使用overloading mock类似alias mock，不过不同的是，类的新实例在创建的时候可以设置预期数据。
 Prefixing the valid name of a class (which is NOT currently loaded) with
 "overload:" will generate an alias mock (as with "alias:") except that created
 new instances of that class will import any expectations set on the origin
@@ -301,6 +321,11 @@ mock (``$mock``). The origin mock is never verified since it's used an
 expectation store for new instances. For this purpose we use the term "instance
 mock" to differentiate it from the simpler "alias mock".
 
+overloading mock 也叫 instance mock，以区别于 alias mock。
+
+instance mock对hard dependency特别有用。
+
+换句话说，一个instance mock会在被mock类生成新对象时进行"拦截"，反而让instance mock代替新对象被使用。
 In other words, an instance mock will "intercept" when a new instance of the
 mocked class is created, then the mock will be used instead. This is useful
 especially when mocking hard dependencies which will be discussed later.
@@ -311,6 +336,8 @@ especially when mocking hard dependencies which will be discussed later.
 
 .. note::
 
+    在多余一个test case中使用instance mocks会报错，因为不能存在两个相同类名的类，可以让
+    两个测试在不同PHP进程环境里运行。
     Using alias/instance mocks across more than one test will generate a fatal
     error since we can't have two classes of the same name. To avoid this,
     run each test of this kind in a separate PHP process (which is supported
@@ -332,6 +359,8 @@ same way as the ``mock`` method:
 
 This example would create a class called ``MyClassName`` that extends
 ``DateTime``.
+
+Named mock
 
 Named mocks are quite an edge case, but they can be useful when code depends
 on the ``__CLASS__`` magic constant, or when we need two derivatives of an
