@@ -16,6 +16,8 @@ Once we have created a mock object, we'll often want to start defining how
 exactly it should behave (and how it should be called). This is where the
 Mockery expectation declarations take over.
 
+Mockery 预期声明
+
 Declaring Method Call Expectations
 ----------------------------------
 
@@ -39,6 +41,7 @@ We can declare more than one method call to be expected:
 
 All of these will adopt any chained expectations or constraints.
 
+也可以共同声明被调用方法及其返回值：
 It is possible to declare the expectations for the method calls, along with
 their return values:
 
@@ -71,7 +74,7 @@ This method is a convenience method for calling ``shouldReceive()->never()``.
 
 Declaring Method Argument Expectations
 --------------------------------------
-
+对于每一个声明方法，还可以添加参数约束
 For every method we declare expectation for, we can add constraints that the
 defined expectations apply only to the method calls that match the expected
 argument list:
@@ -107,6 +110,7 @@ provided to expected calls.
 
 Argument matching with closures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+参数是闭包
 
 Instead of providing a built-in matcher for each argument, we can provide a
 closure that matches all passed arguments at once:
@@ -137,7 +141,7 @@ arguments make the closure evaluate to true:
 
 Any, or no arguments
 ^^^^^^^^^^^^^^^^^^^^
-
+也可以声明不管是否有参数
 We can declare that the expectation matches a method call regardless of what
 arguments are passed:
 
@@ -157,9 +161,9 @@ We can declare that the expectation matches method calls with zero arguments:
     $mock->shouldReceive('name_of_method')
         ->withNoArgs();
 
-Declaring Return Value Expectations
+Declaring Return Value Expectations 声明返回值期望
 -----------------------------------
-
+使用andReturn()来定义返回值
 For mock objects, we can tell Mockery what return values to return from the
 expected method calls.
 
@@ -250,7 +254,7 @@ If we are mocking fluid interfaces, the following method will be helpful:
 
 It sets the return value to the mocked class name.
 
-Throwing Exceptions
+Throwing Exceptions 抛异常
 -------------------
 
 We can tell the method of mock objects to throw exceptions:
@@ -274,7 +278,7 @@ use when throwing an ``Exception`` from the mocked method:
 
 .. _expectations-setting-public-properties:
 
-Setting Public Properties
+Setting Public Properties 设置公开的属性
 -------------------------
 
 Used with an expectation so that when a matching method is called, we can cause
@@ -302,7 +306,7 @@ It allows expectation matching and call count validation to be applied against
 real methods while still calling the real class method with the expected
 arguments.
 
-Declaring Call Count Expectations
+Declaring Call Count Expectations 声明调用次数期望
 ---------------------------------
 
 Besides setting expectations on the arguments of the method calls, and the
@@ -365,7 +369,7 @@ To declare that the expected method must never be called:
     $mock->shouldReceive('name_of_method')
         ->never();
 
-Call count modifiers
+Call count modifiers 调用次数修改器
 ^^^^^^^^^^^^^^^^^^^^
 
 The call count expectations can have modifiers set.
@@ -408,7 +412,7 @@ This is actually identical to using ``atLeast()->times($min)->atMost()->times($m
 but is provided as a shorthand. It may be followed by a ``times()`` call with no
 parameter to preserve the APIs natural language readability.
 
-Expectation Declaration Utilities
+Expectation Declaration Utilities 期望声明工具方法
 ---------------------------------
 
 Declares that this method is expected to be called in a specific order in
